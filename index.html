@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>😎 Emotica Studio | Emoji Editor</title>
+
+    <!-- React + ReactDOM (CDN) -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Styles -->
+    <style>
+      body {
+        margin: 0;
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(135deg, #ffcc00, #ff6f61);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #222;
+      }
+
+      .app-container {
+        text-align: center;
+      }
+
+      .app-header h1 {
+        color: white;
+        font-size: 2.5rem;
+        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      .app-header p {
+        color: white;
+        font-weight: 500;
+      }
+
+      .editor-container {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        padding: 25px;
+        margin-top: 25px;
+        width: 340px;
+      }
+
+      .emoji-canvas {
+        width: 300px;
+        height: 300px;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        display: block;
+        margin: 0 auto 15px;
+      }
+
+      .controls label {
+        display: block;
+        font-weight: 600;
+        margin: 10px 0 4px;
+      }
+
+      .controls input[type="text"] {
+        width: 100%;
+        text-align: center;
+        font-size: 2rem;
+      }
+
+      .controls input[type="color"] {
+        width: 100%;
+        height: 40px;
+        border: none;
+      }
+
+      .controls input[type="checkbox"] {
+        transform: scale(1.3);
+        margin-left: 8px;
+      }
+
+      .ai-btn {
+        background-color: #ff6f61;
+        border: none;
+        color: white;
+        padding: 10px;
+        margin-top: 10px;
+        width: 100%;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      .ai-btn:hover {
+        background-color: #ff5446;
+      }
+
+      .ai-variations {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin: 12px 0;
+      }
+
+      .ai-emoji {
+        font-size: 1.8rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+      }
+
+      .download-btn {
+        background: #222;
+        color: white;
+        padding: 10px;
+        border: none;
+        width: 100%;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1rem;
+      }
+
+      .download-btn:hover {
+        background: #333;
+      }
+
+      footer {
+        margin-top: 20px;
+        color: white;
+        font-weight: 500;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="root"></div>
+
+    <!-- React App -->
+    <script type="text/babel">
+      const { useState, useRef, useEffect } = React;
+
+      function EmojiEditor() {
+        const [emoji, setEmoji] = useState("😎");
+        const [bgColor, setBgColor] = useState("#ffcc00");
+        const [shadow, setShadow] = useState(true);
+        const [aiEmoji, setAiEmoji] = useState([]);
+        const canvasRef = useRef(null);
+
+        const drawCanvas = () => {
+          const canvas = canvasRef.current;
+          const ctx = canvas.getContext("2d");
+          const size = 300;
+          canvas.width = size;
+          canvas.height = size;
+
+          ctx.fillStyle = bgColor;
+          ctx.fillRect(0, 0, size, size);
+
+          if (shadow) {
+            ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
+            ctx.shadowBlur = 15;
+          } else {
+            ctx.shadowBlur = 0;
+          }
+
+          ctx.font = "150px Segoe UI Emoji, Apple Color Emoji, sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(emoji, size / 2, size / 2);
+        };
+
+        const handleDownload = () => {
+          const canvas = canvasRef.current;
+          const link = document.createElement("a");
+          link.download = "emoji.png";
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+        };
+
+        const generateAIEmojis = () => {
+          const suggestions = ["🤖", "🔥", "🌈", "🎨", "😺", "🧠", "💫", "😇"];
+          const randomFour = suggestions.sort(() => 0.5 - Math.random()).slice(0, 4);
+          setAiEmoji(randomFour);
+        };
+
+        useEffect(() => {
+          drawCanvas();
+        }, [emoji, bgColor, shadow]);
+
+        return (
+          <div className="editor-container">
+            <canvas ref={canvasRef} className="emoji-canvas"></canvas>
+
+            <div className="controls">
+              <label>
+                Emoji:
+                <input
+                  type="text"
+                  value={emoji}
+                  maxLength="2"
+                  onChange={(e) => setEmoji(e.target.value)}
+                />
+              </label>
+
+              <label>
+                Background:
+                <input
+                  type="color"
+                  value={bgColor}
+                  onChange={(e) => setBgColor(e.target.value)}
+                />
+              </label>
+
+              <label>
+                Shadow:
+                <input
+                  type="checkbox"
+                  checked={shadow}
+                  onChange={(e) => setShadow(e.target.checked)}
+                />
+              </label>
+
+              <button onClick={generateAIEmojis} className="ai-btn">
+                ✨ Generate AI Variations
+              </button>
+
+              <div className="ai-variations">
+                {aiEmoji.map((emo, i) => (
+                  <button key={i} className="ai-emoji" onClick={() => setEmoji(emo)}>
+                    {emo}
+                  </button>
+                ))}
+              </div>
+
+              <button onClick={handleDownload} className="download-btn">
+                ⬇️ Download Emoji
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      function App() {
+        return (
+          <div className="app-container">
+            <header className="app-header">
+              <h1>😎 Emotica Studio</h1>
+              <p>Create, edit & remix emojis with AI-style magic!</p>
+            </header>
+            <EmojiEditor />
+            <footer>
+              <p>Built with ❤️ using React + JavaScript</p>
+            </footer>
+          </div>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    </script>
+  </body>
+</html>
